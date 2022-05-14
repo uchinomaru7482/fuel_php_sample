@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  mysql:
+    build: ./mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    networks:
+      - fuel_php_net
+
+  php:
+    build: ./php
+    volumes:
+      - ../server:/var/www/server
+      - ./php/php.ini:/usr/local/etc/php/conf.d/php.ini
+    depends_on:
+      - mysql
+    networks:
+      - fuel_php_net
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    restart: always
+    ports:
+      - 8080:80
+    depends_on:
+      - php
+    networks:
+      - fuel_php_net
+
+networks:
+  fuel_php_net:
+    driver: bridge
+
+volumes:
+  mysql:
