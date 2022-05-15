@@ -56,6 +56,13 @@ class Model_Comment extends \Orm\Model
 	);
 
 	protected static $_belongs_to = array(
+		'user' => array(
+			'key_from' => 'user_id',
+			'model_to' => 'Model_User',
+			'key_to' => 'id',
+			'cascade_save' => false,
+			'cascade_delete' => false,
+		)
 	);
 
 }
