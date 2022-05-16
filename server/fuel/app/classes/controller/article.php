@@ -41,4 +41,40 @@ class Controller_Article extends Controller_Template
     $this->template->title = $data['article']->title;
     $this->template->content = View::forge('article/view', $data);
   }
+
+  public function action_login()
+  {
+    // ログイン済ならリダイレクト
+    Auth::check() and Response::redirect('articles');
+
+    $data = array();
+
+    $auth = Auth::instance();
+    // usernameとpasswordがPOSTされているなら認証する
+    if (Input::post('username') and Input::post('password')) {
+      $username = Input::post('username');
+      $password = Input::post('password');
+      // これは必要？
+      $auth = Auth::instance();
+
+      // 認証
+      if ($auth->login($username, $password)) {
+        Response::redirect('article');
+      } else {
+        // 認証失敗時はビューに$errorをセット
+        $data['error'] = true;
+      }
+    }
+
+    $this->template->title = 'ログイン';
+    $this->template->content = View::forge('article/login');
+  }
+
+  public function action_logout()
+  {
+    // ログアウト
+    $auth = Auth::instance();
+    $auth->logout();
+    Response::redirect('article');
+  }
 }
