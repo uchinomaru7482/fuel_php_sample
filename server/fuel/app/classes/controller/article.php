@@ -103,6 +103,33 @@ class Controller_Article extends Controller_Template
     $this->template->set('content', $fieldset->build(), false);
   }
 
+  public function action_edit($id = 0)
+  {
+    if ($id) {
+      $article = Model_Article::find($id);
+      if (!$article or $article->user_id != Arr::get(Auth::get_user_id(), 1)) {
+        Response::redirect('articles');
+      }
+    }
+
+    $fieldset = Fieldset::forge()->add_model('Model_Article');
+    $fieldset->add_after('submit', '', array('type' => 'submit', 'value' => '更新'), array(), 'body');
+    $fieldset->populate($article, true);
+
+    if ($fieldset->validation()->run()) {
+      $fields = $fieldset->validated();
+      $article->title = $fields['title'];
+      $article->body = $fields['body'];
+      $article->user_id = $fields['user_id'];
+
+      if ($article->save()) {
+        Response::redirect('article/view/' . $article->id);
+      }
+    }
+    $this->template->title = '投稿編集';
+    $this->template->set('content', $fieldset->build(), false);
+  }
+
   public function action_login()
   {
     // ログイン済ならリダイレクト
