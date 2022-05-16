@@ -4,6 +4,15 @@ class Controller_Article extends Controller_Template
 {
   private $per_page = 3;
 
+  public function before()
+  {
+    parent::before();
+    // 未認証状態でリクエストのアクションがlogin, index, view以外ならリダイレクト
+    if (!Auth::check() and !in_array(Request::active()->action, array('login', 'index', 'view'))) {
+      Response::redirect('article/login');
+    }
+  }
+
   public function action_index()
   {
     $data = array();
@@ -40,6 +49,58 @@ class Controller_Article extends Controller_Template
     }
     $this->template->title = $data['article']->title;
     $this->template->content = View::forge('article/view', $data);
+  }
+
+  public function action_create()
+  {
+    $article = Model_Article::forge();
+    // ログイン中のユーザIDを設定
+    $article->user_id = Arr::get(Auth::get_user_id(), 1);
+
+    // カテゴリチェックボックス用オプション配列
+    $categories = Model_Category::find('all');
+    $category_options = array();
+    foreach ($categories as $category) {
+      $category_options[$category->id] = $category->name;
+    }
+
+    // Fieldsetオブジェクトにモデルを登録
+    $fieldset = Fieldset::forge()->add_model('Model_Article');
+
+    // カテゴリチェックボックスとボタンを登録
+    $fieldset->add_before('category_id', 'カテゴリ', array('type' => 'checkbox', 'options' => $category_options), array(), 'title')->add_after('submit', '', array('type' => 'submit', 'value' => '投稿'), array(), 'body');
+
+    // モデルの値をFieldsetに登録
+    $fieldset->populate($article, true);
+
+    // validationの実行
+    if ($fieldset->validation()->run()) {
+      // validationに成功したフィールドの読み込み
+      $fields = $fieldset->validated();
+
+      $article = Model_Article::forge();
+      $article->title = $fields['title'];
+      $article->body = $fields['body'];
+      $article->user_id = $fields['user_id'];
+
+      // カテゴリIDからカテゴリオブジェクトを生成して$categoriesプロパティに設定
+      if ($fields['category_id']) {
+        foreach ($fields['category_id'] as $category_id) {
+          $category = Model_Category::find($category_id);
+          if ($category) {
+            $article->categories[] = $category;
+          }
+        }
+      }
+
+      if ($article->save()) {
+        Response::redirect('article/view/' . $article->id);
+      }
+    }
+
+    // 最初にアクセスした際にはフォームを表示
+    $this->template->title = '新規投稿';
+    $this->template->set('content', $fieldset->build(), false);
   }
 
   public function action_login()
