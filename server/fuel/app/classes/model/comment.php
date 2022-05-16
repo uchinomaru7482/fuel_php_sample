@@ -10,22 +10,30 @@ class Model_Comment extends \Orm\Model
 		"article_id" => array(
 			"label" => "Article id",
 			"data_type" => "int",
+			"validation" => array("required", "valid_string" => array(array("numeric"))),
+			"form" => array("type" => "hidden"),
 		),
 		"user_id" => array(
 			"label" => "User id",
 			"data_type" => "int",
+			"validation" => array("required", "valid_string" => array(array("numeric"))),
+			"form" => array("type" => "hidden"),
 		),
 		"body" => array(
 			"label" => "Body",
 			"data_type" => "text",
+			"validation" => array("required"),
+			"form" => array("type" => "textarea"),
 		),
 		"created_at" => array(
 			"label" => "Created at",
 			"data_type" => "int",
+			"form" => array("type" => false),
 		),
 		"updated_at" => array(
 			"label" => "Updated at",
 			"data_type" => "int",
+			"form" => array("type" => false),
 		),
 	);
 

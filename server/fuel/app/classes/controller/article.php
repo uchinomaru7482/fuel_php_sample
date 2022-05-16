@@ -47,8 +47,38 @@ class Controller_Article extends Controller_Template
     if (!$data['article']) {
       Response::redirect('articles');
     }
+
+    $comment = Model_Comment::forge();
+    $comment->user_id = Arr::get(Auth::get_user_id(), 1);
+    $comment->article_id = $id;
+
+    $fieldset = Fieldset::forge()->add_model('Model_Comment');
+    $fieldset->populate($comment, true);
+    $fieldset->add('submit', '', array('type' => 'submit', 'value' => 'コメントする', 'class' => 'btn medium primary'));
+
+    if ($fieldset->validation()->run()) {
+      $fields = $fieldset->validated();
+      $comment->body = $fields['body'];
+      $comment->user_id = $fields['user_id'];
+      $comment->article_id = $fields['article_id'];
+
+      if ($comment->save()) {
+        Response::redirect('article/view/' . $id);
+      }
+    }
+
+    // ログイン中のみフォームを表示
+    if (Auth::check()) {
+      $form = $fieldset->build();
+    } else {
+      // ログインしていない場合は空文字列を返す
+      $form = '';
+    }
+
     $this->template->title = $data['article']->title;
-    $this->template->content = View::forge('article/view', $data);
+    $view = View::forge('article/view', $data);
+    $view->set_safe('form', $form);
+    $this->template->content = $view;
   }
 
   public function action_create()

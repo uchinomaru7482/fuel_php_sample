@@ -27,3 +27,4 @@
     <?php endforeach; ?>
   </div>
 <?php endif; ?>
+<?php echo $form ?>
