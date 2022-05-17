@@ -13,7 +13,8 @@
         "fuel/oil": "dev-1.9/develop",
         "fuel/orm": "dev-1.9/develop",
         "fuel/parser": "dev-1.9/develop",
-        "fuelphp/upload": "2.0.6"
+        "fuelphp/upload": "2.0.6",
+        "phpunit/phpunit": "4.2.*"
     },
     "require-dev": {
         "fuel/docs": "dev-1.9/develop"

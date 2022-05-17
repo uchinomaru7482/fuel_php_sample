@@ -9,4 +9,9 @@ class Controller_Example extends Controller
     $data['params'] = $this->request->route->method_params;
     return View::forge('params', $data);
   }
+
+  public function action_hello()
+  {
+    return 'hello';
+  }
 }
